@@ -456,11 +456,20 @@
       requestAnimationFrame(step);
     }
 
-    fetch("https://abacus.jasoncameron.dev/hit/5968142-ghst-visits/visits")
+    // 세션 기준 중복 카운트 방지 로직 (새로고침 시 숫자 증가 방지)
+    var hasVisited = sessionStorage.getItem("hasVisited");
+    var apiEndpoint = hasVisited
+      ? "https://abacus.jasoncameron.dev/get/5968142-ghst-visits/visits"
+      : "https://abacus.jasoncameron.dev/hit/5968142-ghst-visits/visits";
+
+    fetch(apiEndpoint)
       .then(function (r) { return r.json(); })
       .then(function (d) {
         var el = document.getElementById("visitor-count");
         if (el) countUp(el, d.value || 0, 1400);
+        if (!hasVisited) {
+          sessionStorage.setItem("hasVisited", "true");
+        }
       })
       .catch(function () {
         var el = document.getElementById("visitor-count");
